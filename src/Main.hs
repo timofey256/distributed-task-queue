@@ -1,7 +1,7 @@
 module Main where
 
-import ConsumerExample
-import ProducerExample
+import Server
+import Worker
 
 main :: IO ()
 main = do

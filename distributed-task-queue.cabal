@@ -20,6 +20,6 @@ executable distributed-task-queue
                       , hw-kafka-client
                       , text
   other-modules:
-                        ConsumerExample
-                        ProducerExample
+                        Worker
+                        Server
   default-language:     Haskell2010
