@@ -1,7 +1,14 @@
-module Main (main) where
+module Main where
 
-import DistributedTaskQueue.Types
+import ConsumerExample
+import ProducerExample
 
 main :: IO ()
 main = do
-  putStrLn "hello world"
+  putStrLn "Running producer example..."
+  runProducerExample
+
+  putStrLn "Running consumer example..."
+  runConsumerExample
+
+  putStrLn "Ok."
