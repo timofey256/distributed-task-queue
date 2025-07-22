@@ -20,6 +20,8 @@ import qualified Data.Text.Encoding as TE
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUIDv4
 import qualified Data.ByteString.Lazy as BL
+import           Distributed.TaskQueue.Core (Payload(..), enqueue)
+
 
 -- Global producer properties
 producerProps :: Text -> Int -> ProducerProperties
