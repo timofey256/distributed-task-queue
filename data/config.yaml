@@ -1,0 +1,4 @@
+url: localhost:9092
+topic_name: kafka-client-example-topic
+timeout: 10000
+group_id: consumer_example_group

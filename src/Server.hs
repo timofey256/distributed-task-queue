@@ -29,6 +29,10 @@ producerProps url timeout =
   <> setCallback (deliveryCallback print)
   <> logLevel KafkaLogDebug
 
+-- Topic to send messages to
+targetTopic :: TopicName
+targetTopic = "kafka-client-example-topic"
+
 mkMessage :: TopicName -> Maybe ByteString -> Maybe ByteString -> ProducerRecord
 mkMessage targetTopic k v = ProducerRecord
                   { prTopic = targetTopic
