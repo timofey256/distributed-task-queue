@@ -19,7 +19,11 @@ executable distributed-task-queue
                       , bytestring
                       , hw-kafka-client
                       , text
+                      , aeson
+                      , uuid
+                      , yaml
   other-modules:
                         Worker
                         Server
+  data-files:           data/config.yaml
   default-language:     Haskell2010

@@ -13,19 +13,24 @@ import Kafka.Consumer          (Offset)
 import Kafka.Producer
 import Data.Text               (Text)
 
+import Domain
+import Data.Aeson (encode)
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as TE
+import qualified Data.UUID as UUID
+import qualified Data.UUID.V4 as UUIDv4
+import qualified Data.ByteString.Lazy as BL
+
 -- Global producer properties
-producerProps :: ProducerProperties
-producerProps = brokersList ["localhost:9092"]
-             <> sendTimeout (Timeout 10000)
-             <> setCallback (deliveryCallback print)
-             <> logLevel KafkaLogDebug
+producerProps :: Text -> Int -> ProducerProperties
+producerProps url timeout =
+  brokersList [BrokerAddress url]
+  <> sendTimeout (Timeout timeout)
+  <> setCallback (deliveryCallback print)
+  <> logLevel KafkaLogDebug
 
--- Topic to send messages to
-targetTopic :: TopicName
-targetTopic = "kafka-client-example-topic"
-
-mkMessage :: Maybe ByteString -> Maybe ByteString -> ProducerRecord
-mkMessage k v = ProducerRecord
+mkMessage :: TopicName -> Maybe ByteString -> Maybe ByteString -> ProducerRecord
+mkMessage targetTopic k v = ProducerRecord
                   { prTopic = targetTopic
                   , prPartition = UnassignedPartition
                   , prKey = k
@@ -34,44 +39,49 @@ mkMessage k v = ProducerRecord
                   }
 
 -- Run an example
-runProducerExample :: IO ()
-runProducerExample =
+runProducerExample :: Config -> IO ()
+runProducerExample config =
     bracket mkProducer clProducer runHandler >>= print
     where
-      mkProducer = newProducer producerProps
+      producer_url = url config
+      timeout_value = timeout config
+      topic = TopicName (topic_name config)
+      mkProducer = newProducer (producerProps producer_url timeout_value)
       clProducer (Left _)     = return ()
       clProducer (Right prod) = closeProducer prod
       runHandler (Left err)   = return $ Left err
-      runHandler (Right prod) = sendMessages prod
+      runHandler (Right prod) = sendMessages topic prod
 
-sendMessages :: KafkaProducer -> IO (Either KafkaError ())
-sendMessages prod = do
+sendMessages :: TopicName -> KafkaProducer -> IO (Either KafkaError ())
+sendMessages topic prod = do
   putStrLn "Producer is ready, send your messages!"
+
+  putStrLn "Sending first sum array message..."
+  createAndSendSumTask prod topic [1,2,3,4,5]
+
+  putStrLn "First message:"
   msg1 <- getLine
 
-  err1 <- produceMessage prod (mkMessage (Just "zero") (Just $ pack msg1))
+  err1 <- produceMessage prod (mkMessage topic (Just "zero") (Just $ pack msg1))
   forM_ err1 print
 
   putStrLn "One more time!"
   msg2 <- getLine
 
-  err2 <- produceMessage prod (mkMessage (Just "key") (Just $ pack msg2))
+  err2 <- produceMessage prod (mkMessage topic (Just "key") (Just $ pack msg2))
   forM_ err2 print
 
   putStrLn "And the last one..."
   msg3 <- getLine
-  err3 <- produceMessage prod (mkMessage (Just "key3") (Just $ pack msg3))
+  err3 <- produceMessage prod (mkMessage topic (Just "key3") (Just $ pack msg3))
 
-  err4 <- produceMessage prod ((mkMessage (Just "key4") (Just $ pack msg3)) { prHeaders = headersFromList [("fancy", "header")]})
+  err4 <- produceMessage prod ((mkMessage topic (Just "key4") (Just $ pack msg3)) { prHeaders = headersFromList [("fancy", "header")]})
 
   -- forM_ errs (print . snd)
 
   putStrLn "Thank you."
   return $ Right ()
 
--- | An example for sending messages synchronously using the 'produceMessage''
---   function
---
 sendMessageSync :: MonadIO m
                 => KafkaProducer
                 -> ProducerRecord
@@ -97,3 +107,20 @@ sendMessageSync producer record = liftIO $ do
         DeliverySuccess _ offset -> Right offset
         DeliveryFailure _ err    -> Left err
         NoMessageError err       -> Left err
+
+sendTask :: KafkaProducer -> TopicName -> Task -> IO ()
+sendTask prod topic task = do
+  let msg = mkMessage topic (Just $ TE.encodeUtf8 $ taskId task) (Just $ BL.toStrict (encode task))
+  produceMessage prod msg >>= mapM_ print
+
+createAndSendSumTask :: KafkaProducer -> TopicName -> [Int] -> IO ()
+createAndSendSumTask prod topic numbers = do
+  uuid <- UUID.toText <$> UUIDv4.nextRandom
+  let task = Task uuid SumArray (T.pack $ show numbers)
+  sendTask prod topic task
+
+createAndSendReverseTask :: KafkaProducer -> TopicName -> String -> IO ()
+createAndSendReverseTask prod topic str = do
+  uuid <- UUID.toText <$> UUIDv4.nextRandom
+  let task = Task uuid ReverseString (T.pack str)
+  sendTask prod topic task
