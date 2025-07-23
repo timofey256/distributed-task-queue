@@ -6,7 +6,7 @@ module Distributed.TaskQueue.Worker
   , defaultSub
   ) where
 
-import           Control.Exception             (bracket)
+import           Control.Exception              (bracket)
 import           Control.Monad                  (forever)
 import qualified Data.ByteString                as BS
 import qualified Data.ByteString.Lazy           as BL
@@ -15,8 +15,6 @@ import           Kafka.Consumer
 import           Distributed.TaskQueue.Registry (HandlerRegistry, lookupHandler)
 import           Distributed.TaskQueue.Core    (decodeEnvelope)
 
-
--- Users will typically override at least groupId / brokersList.
 defaultConsumerProps :: ConsumerProperties
 defaultConsumerProps =
        brokersList ["localhost:9092"]
@@ -24,7 +22,7 @@ defaultConsumerProps =
     <> noAutoCommit
     <> logLevel KafkaLogInfo
 
-defaultSub :: Text -> Subscription          -- ^ topic name
+defaultSub :: Text -> Subscription
 defaultSub topic =
        topics [TopicName topic]
     <> offsetReset Earliest
@@ -48,7 +46,7 @@ runWorkers registry props sub = do
   loop kc = do
     eRec <- pollMessage kc (Timeout 1000)
     case eRec of
-      Left _err        -> pure ()                          -- logging omitted
+      Left _err        -> pure ()
       Right record     ->
         case crValue record of
           Nothing   -> pure ()                             -- ignore tombstone
