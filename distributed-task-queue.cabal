@@ -19,6 +19,7 @@ library
                       , Distributed.TaskQueue.Core
                       , Distributed.TaskQueue.Registry
                       , Distributed.TaskQueue.Worker
+                      , Examples.Payloads
   hs-source-dirs:       src
   build-depends:        base       >=4.6 && <5
                       , bytestring
@@ -29,7 +30,7 @@ library
                       , unordered-containers
                       , hashable            
                       , hw-kafka-client
-  default-language:     Haskell2010
+  default-language:   Haskell2010
 
 -- Executables ----------------------------------------------------
 executable dtq-send
@@ -39,6 +40,8 @@ executable dtq-send
   build-depends:      base
                     , aeson
                     , yaml
+                    , text              
+                    , hw-kafka-client   
                     , distributed-task-queue
 
   default-language:   Haskell2010
