@@ -13,7 +13,6 @@ import           Data.Text                     (pack)
 import           Distributed.TaskQueue.Core    (enqueue)
 import           System.IO                     (hFlush, stdout)
 
--- same Config instance
 instance FromJSON Config where
   parseJSON = withObject "Config" $ \v ->
     Config <$> v .: "url"
@@ -53,6 +52,14 @@ main = do
                 txt <- getLine
                 _ <- enqueue prod topic (ReverseText (pack txt))
                 putStrLn "enqueued."
+                loop
+              "m" -> do
+                putStrLn "Enter first matrix rows (numbers separated by space), blank line to finish:"
+                aRows <- gatherRows
+                putStrLn "Enter second matrix rows:"
+                bRows <- gatherRows
+                _ <- enqueue prod topic (MatMul aRows bRows)
+                putStrLn "mat-mul enqueued."
                 loop
               _   -> putStrLn "unknown command" >> loop
 

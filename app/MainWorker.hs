@@ -13,8 +13,12 @@ sumHandler (SumArray xs) = print (sum xs)
 reverseHandler :: ReverseText -> IO ()
 reverseHandler (ReverseText t) = putStrLn (unpack (Data.Text.reverse t))
 
+matMulHandler :: MatMul -> IO ()
+matMulHandler (MatMul a b) = print (matMul a b)
+
 registry = register @ReverseText reverseHandler
          $ register @SumArray    sumHandler
+         $ register @MatMul      matMulHandler
          $ emptyRegistry
 
 main :: IO ()
