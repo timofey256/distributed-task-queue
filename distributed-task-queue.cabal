@@ -13,8 +13,6 @@ data-files:             data/config.yaml
 -- Library --------------------------------------------------------
 library
   exposed-modules:      Domain
-                      , Server
-                      , Worker
                       , Distributed.TaskQueue
                       , Distributed.TaskQueue.Core
                       , Distributed.TaskQueue.Registry
