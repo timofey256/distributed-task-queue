@@ -9,7 +9,7 @@ It provides a simple way to:
 * **Enqueue tasks** into Kafka.
 * **Register workers** to process tasks.
 
-There are built-in examples (`SumArray`, `ReverseText`, `MatMul`) but you are not restricted to them. You can define tasks yourself and plug them into the system.
+There are built-in examples (`SumArray`, `ReverseText`) but you are not restricted to them. You can define tasks yourself and plug them into the system.
 
 ---
 
@@ -103,7 +103,7 @@ main = runWorkers registry defaultConsumerProps (defaultSub "tasks")
 If you just want to see a demo, you can run ready-made executables:
 
 * **Producer CLI** (`dtq-send`)
-  If supports basic tasks - `SumArray`, `ReverseText`, or `MatMul` interactively.
+  If supports basic tasks - `SumArray`, or `ReverseText` interactively.
 
 * **Worker CLI** (`dtq-worker`)
   Runs worker processes with handlers for the example payloads.
