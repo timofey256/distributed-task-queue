@@ -98,7 +98,7 @@ main = runWorkers registry defaultConsumerProps (defaultSub "tasks")
 
 ---
 
-### Very quick start
+## Very quick start
 
 If you just want to see a demo, you can run ready-made executables:
 
