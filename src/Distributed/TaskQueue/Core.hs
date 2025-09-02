@@ -28,20 +28,14 @@ import           Kafka.Producer
 import           Data.UUID            (UUID)
 import qualified Data.UUID.V4         as UUIDv4
 
---------------------------------------------------------------------------------
--- | A user payload must be JSON serialisable and have a unique name.
 class (ToJSON p, FromJSON p, Typeable p) => Payload p where
   taskName :: Proxy p -> Text
 
---------------------------------------------------------------------------------
--- | Existential wrapper that erases the concrete 'p' but keeps its name.
 data TaskEnvelope = forall p. Payload p => TaskEnvelope
   { envId      :: UUID
   , envPayload :: p
   }
 
---------------------------------------------------------------------------------
--- SERIALISATION ---------------------------------------------------------------
 instance ToJSON TaskEnvelope where
   toJSON (TaskEnvelope u (payload :: p)) =
     object [ "id"   .= u
@@ -52,7 +46,6 @@ instance ToJSON TaskEnvelope where
 encodeEnvelope :: TaskEnvelope -> BL.ByteString
 encodeEnvelope = encode
 
--- | Decode without knowing the concrete type – we only get (name, Value).
 decodeEnvelope :: BL.ByteString -> Maybe (UUID, Text, Value)
 decodeEnvelope bs =
   decode bs >>= AT.parseMaybe
@@ -61,14 +54,12 @@ decodeEnvelope bs =
                          <*> o .: "name"
                          <*> o .: "body")
 
---------------------------------------------------------------------------------
--- PRODUCER HELPER -------------------------------------------------------------
 enqueue
   :: forall p. Payload p
   => KafkaProducer
   -> TopicName
   -> p                    -- ^ strongly‑typed payload
-  -> IO UUID              -- ^ generated UUID returned for tracking
+  -> IO UUID              
 enqueue prod topic p = do
   uuid <- UUIDv4.nextRandom
   let env   = TaskEnvelope uuid p

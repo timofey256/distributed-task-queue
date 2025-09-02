@@ -4,7 +4,7 @@
 {-# LANGUAGE TypeApplications #-}
 
 module Distributed.TaskQueue.Registry
-  ( HandlerRegistry     -- opaque
+  ( HandlerRegistry
   , emptyRegistry
   , register
   , lookupHandler
@@ -18,7 +18,7 @@ import           Data.Text             (Text)
 import           Distributed.TaskQueue.Core (Payload(..))
 
 newtype HandlerRegistry =
-        HR (HM.HashMap Text (Value -> IO ()))   -- name → action
+        HR (HM.HashMap Text (Value -> IO ()))
 
 emptyRegistry :: HandlerRegistry
 emptyRegistry = HR HM.empty

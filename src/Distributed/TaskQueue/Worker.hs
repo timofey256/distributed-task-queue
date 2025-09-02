@@ -27,7 +27,6 @@ defaultSub topic =
        topics [TopicName topic]
     <> offsetReset Earliest
 
--- | Poll in a tight loop, dispatching each envelope to its handler.
 runWorkers
   :: HandlerRegistry
   -> ConsumerProperties
@@ -49,7 +48,7 @@ runWorkers registry props sub = do
       Left _err        -> pure ()
       Right record     ->
         case crValue record of
-          Nothing   -> pure ()                             -- ignore tombstone
+          Nothing   -> pure ()
           Just bs -> do
             handle bs
             _ <- commitAllOffsets OffsetCommit kc
