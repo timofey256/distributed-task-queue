@@ -35,7 +35,7 @@ Or install locally:
 cabal install distributed-task-queue
 ```
 
-Kafka must be running locally (default: `localhost:9092`) or on your cluster. See a [short guide](./docs/how-to-kafka,md) on how to set it up.
+Kafka must be running locally (default: `localhost:9092`) or on your cluster. See a [short guide](./docs/how-to-kafka.md) on how to set it up.
 
 ---
 
