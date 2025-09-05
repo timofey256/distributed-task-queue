@@ -52,3 +52,19 @@ executable dtq-worker
                  , text
                  , distributed-task-queue
   default-language:   Haskell2010
+
+-- Tests ----------------------------------------------------
+test-suite unit
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      tests
+  main-is:             Spec.hs
+  build-depends:       base
+                     , hspec
+                     , aeson
+                     , text
+                     , bytestring
+                     , uuid
+                     , distributed-task-queue
+  build-tool-depends:  hspec-discover:hspec-discover
+  default-language:    Haskell2010
+

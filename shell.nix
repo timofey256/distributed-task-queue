@@ -24,6 +24,8 @@ pkgs.mkShell {
     ]))
     pkgs.zlib
     pkgs.pkg-config
+    pkgs.python314
+    pkgs.nodejs_22
   ];
 
   shellHook = ''
