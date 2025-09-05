@@ -27,6 +27,7 @@ defaultSub topic =
        topics [TopicName topic]
     <> offsetReset Earliest
 
+-- Main worker loop.
 runWorkers
   :: HandlerRegistry
   -> ConsumerProperties
@@ -36,24 +37,31 @@ runWorkers registry props sub = do
   res <- bracket mkConsumer clConsumer runHandler
   either print (const (pure ())) res
  where
+  -- create consumer
   mkConsumer = newConsumer props sub
+  
+  -- cleanup consumer
   clConsumer (Left err) = return (Left err)
   clConsumer (Right kc) = maybe (Right ()) Left <$> closeConsumer kc
+
+  -- run loop if consumer started
   runHandler (Left err) = return (Left err)
   runHandler (Right kc) = forever (loop kc) >> pure (Right ())
 
+  -- poll messages
   loop kc = do
     eRec <- pollMessage kc (Timeout 1000)
     case eRec of
-      Left _err        -> pure ()
+      Left _err    -> pure ()  -- ignore timeouts/errors
       Right record     ->
         case crValue record of
-          Nothing   -> pure ()
+          Nothing -> pure ()   -- skip empty
           Just bs -> do
             handle bs
             _ <- commitAllOffsets OffsetCommit kc
             pure ()
 
+  -- decode envelope and dispatch
   handle :: BS.ByteString -> IO ()
   handle bs = case decodeEnvelope (BL.fromStrict bs) of
     Nothing            -> putStrLn "invalid envelope"

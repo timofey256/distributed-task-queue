@@ -16,6 +16,7 @@ reverseHandler (ReverseText t) = putStrLn (unpack (Data.Text.reverse t))
 matMulHandler :: MatMul -> IO ()
 matMulHandler (MatMul a b) = print (matMul a b)
 
+-- register all the commands
 registry = register @ReverseText reverseHandler
          $ register @SumArray    sumHandler
          $ register @MatMul      matMulHandler

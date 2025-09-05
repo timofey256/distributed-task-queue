@@ -28,14 +28,20 @@ import           Kafka.Producer
 import           Data.UUID            (UUID)
 import qualified Data.UUID.V4         as UUIDv4
 
+-- Typeclass for all payloads that can be enqueued
+--   * Must be serializable (ToJSON, FromJSON)
+--   * Must be typeable (runtime reflection)
 class (ToJSON p, FromJSON p, Typeable p) => Payload p where
   taskName :: Proxy p -> Text
 
+-- Universal task wrapper that adds a UUID to any Payload
 data TaskEnvelope = forall p. Payload p => TaskEnvelope
   { envId      :: UUID
   , envPayload :: p
   }
 
+-- Encode envelope into JSON object
+-- { "id": ..., "name": ..., "body": ... }
 instance ToJSON TaskEnvelope where
   toJSON (TaskEnvelope u (payload :: p)) =
     object [ "id"   .= u
@@ -46,6 +52,8 @@ instance ToJSON TaskEnvelope where
 encodeEnvelope :: TaskEnvelope -> BL.ByteString
 encodeEnvelope = encode
 
+-- Decode envelope into (UUID, task name, JSON body)
+-- Body is left as raw JSON Value so we can dispatch dynamically.
 decodeEnvelope :: BL.ByteString -> Maybe (UUID, Text, Value)
 decodeEnvelope bs =
   decode bs >>= AT.parseMaybe
@@ -54,6 +62,13 @@ decodeEnvelope bs =
                          <*> o .: "name"
                          <*> o .: "body")
 
+-- Enqueue a payload into Kafka.
+-- Steps:
+-- 1. Generate UUID
+-- 2. Wrap in TaskEnvelope
+-- 3. Serialize to JSON
+-- 4. Send as Kafka message with key = task name
+-- 5. Return UUID
 enqueue
   :: forall p. Payload p
   => KafkaProducer

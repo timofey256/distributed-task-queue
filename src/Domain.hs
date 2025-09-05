@@ -14,6 +14,7 @@ data TaskType = SumArray | ReverseString
 instance ToJSON TaskType
 instance FromJSON TaskType
 
+-- Main type : General Task representation
 data Task = Task
   { taskId   :: T.Text
   , taskType :: TaskType
@@ -23,6 +24,7 @@ data Task = Task
 instance ToJSON Task
 instance FromJSON Task
 
+-- Result returned from processing a Task
 data Result = Result
   { resultTaskId :: T.Text
   , resultValue  :: T.Text
@@ -31,6 +33,7 @@ data Result = Result
 instance ToJSON Result
 instance FromJSON Result
 
+-- Configuration loaded from YAML
 data Config = Config
   { url        :: Text
   , topic_name :: Text

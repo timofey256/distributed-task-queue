@@ -13,6 +13,7 @@ import           Data.Text                     (pack)
 import           Distributed.TaskQueue.Core    (enqueue)
 import           System.IO                     (hFlush, stdout)
 
+-- Parse Config from YAML
 instance FromJSON Config where
   parseJSON = withObject "Config" $ \v ->
     Config <$> v .: "url"
@@ -20,6 +21,7 @@ instance FromJSON Config where
            <*> v .: "timeout"
            <*> v .: "group_id"
 
+-- Build Kafka producer properties from config
 producerProps :: Config -> ProducerProperties
 producerProps cfg =
      brokersList [BrokerAddress (url cfg)]
@@ -36,6 +38,8 @@ main = do
       putStrLn "Send 's' for SumArray or 'r' for ReverseText, empty line to quit."
 
       let topic = TopicName (topic_name cfg)
+
+          -- REPL loop for interactive commands
           loop = do
             putStr "> " >> hFlush stdout
             cmd <- getLine

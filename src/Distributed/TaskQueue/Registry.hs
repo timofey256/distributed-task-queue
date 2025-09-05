@@ -17,12 +17,15 @@ import           Data.Text             (Text)
 
 import           Distributed.TaskQueue.Core (Payload(..))
 
-newtype HandlerRegistry =
-        HR (HM.HashMap Text (Value -> IO ()))
+-- Registry maps taskName → handler
+-- Handlers take a generic JSON Value (decoded later).
+newtype HandlerRegistry = HR (HM.HashMap Text (Value -> IO ()))
 
 emptyRegistry :: HandlerRegistry
 emptyRegistry = HR HM.empty
 
+-- Register a handler for a given payload type.
+-- It inserts (taskName p -> function) into the map.
 register   :: forall p. Payload p
            => (p -> IO ())     -- ^ handler
            -> HandlerRegistry

@@ -54,8 +54,7 @@ transpose :: Matrix -> Matrix
 transpose ([]:_) = []
 transpose x      = map head x : transpose (map tail x)
 
--- helper for matmul in MainSend.hs
--- TODO: move somewhere else
+-- helper for matmul in MainSend.hs: read rows from stdin until blank
 gatherRows :: IO [[Int]]
 gatherRows = do
   l <- getLine
